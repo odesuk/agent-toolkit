@@ -1,0 +1,7 @@
+{
+  "name": "weekly-usage",
+  "version": "0.1.0",
+  "description": "Shows how much of the weekly usage limit is left for today.",
+  "author": { "name": "odesuk" },
+  "types": "./types/index.d.ts"
+}

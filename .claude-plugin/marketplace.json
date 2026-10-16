@@ -1,0 +1,6 @@
+{
+  "name": "agent-toolkit",
+  "owner": { "name": "odesuk" },
+  "description": "Mods and skills for AI coding agents.",
+  "plugins": [{ "name": "weekly-usage", "source": "./weekly-usage" }]
+}
