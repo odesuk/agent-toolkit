@@ -8,6 +8,7 @@ import {
   findLimit,
   hourlyBudget,
   paceAllowance,
+  paceIcon,
   weekdayTime,
 } from './usage'
 
@@ -101,4 +102,13 @@ test('findLimit picks by kind', () => {
   ]
   expect(findLimit(limits, 'five_hour')?.percentUsed).toBe(3)
   expect(findLimit(limits, 'spend_limit')).toBe(undefined)
+})
+
+test('paceIcon thresholds', () => {
+  expect(paceIcon(160)).toBe('🟢')
+  expect(paceIcon(50)).toBe('🟢')
+  expect(paceIcon(49.9)).toBe('🟡')
+  expect(paceIcon(15)).toBe('🟡')
+  expect(paceIcon(14.9)).toBe('🔴')
+  expect(paceIcon(-20)).toBe('🔴')
 })

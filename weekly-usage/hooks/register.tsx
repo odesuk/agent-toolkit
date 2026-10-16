@@ -8,6 +8,7 @@ import {
   endOfToday,
   findLimit,
   hourlyBudget,
+  paceIcon,
   weekdayTime,
 } from './usage'
 import type { Limit } from './usage'
@@ -111,8 +112,8 @@ export const register: Register = on => {
     const reset = parseReset(view.resetsAt)
     const headline =
       available === null || reset === null
-        ? "Today's share unknown"
-        : `${available.toFixed(1)}% available until ${weekdayTime(endOfToday(reset, now))}`
+        ? "⚪ Today's share unknown"
+        : `${paceIcon(available)} ${available.toFixed(1)}% available until ${weekdayTime(endOfToday(reset, now))}`
     const usage = await $.session.usage()
     const fiveHour = findLimit(usage.rateLimits, 'five_hour')
     const fiveReset = parseReset(fiveHour?.resetsAt)
@@ -122,20 +123,20 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Text bold>{headline}</Text>
         <Text>
-          Weekly: {view.percentUsed}% used, {left}% left.{weeklyResetText(view.resetsAt, now)}
+          📅 Weekly: {view.percentUsed}% used, {left}% left.{weeklyResetText(view.resetsAt, now)}
         </Text>
         {hourly !== null && (
           <Text>
-            Hourly: {hourly.toFixed(1)}% per hour to reset (base 100% per hour)
+            ⏱️ Hourly: {hourly.toFixed(1)}% per hour to reset (base 100% per hour)
           </Text>
         )}
         {fiveHour !== undefined && (
           <Text>
-            5-hour: {fiveHour.percentUsed}% used.
+            ⏳ 5-hour: {fiveHour.percentUsed}% used.
             {fiveReset === null ? '' : ` Resets in ${durationText(fiveReset - now)}`}
           </Text>
         )}
-        {cost !== undefined && <Text dimColor>This session: ${cost.usd.toFixed(2)}</Text>}
+        {cost !== undefined && <Text dimColor>💲 This session: ${cost.usd.toFixed(2)}</Text>}
       </Box>
     )
   })

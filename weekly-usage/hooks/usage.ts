@@ -64,6 +64,10 @@ export const availableToday = (
   return Math.round(((allowance - percentUsed) / DAY_SHARE) * 100 * 10) / 10
 }
 
+// Pace status for the day figure: 50+ green, 15 to under 50 yellow, under 15 red.
+export const paceIcon = (available: number): string =>
+  available >= 50 ? '🟢' : available >= 15 ? '🟡' : '🔴'
+
 export const hourlyBudget = (
   percentUsed: number,
   resetsAt: string | null,
