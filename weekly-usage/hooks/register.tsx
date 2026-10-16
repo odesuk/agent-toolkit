@@ -4,9 +4,11 @@ import type { EngineInterface, Register } from 'claude-code'
 import {
   availableToday,
   computeWeek,
+  durationText,
   endOfToday,
+  findLimit,
   hourlyBudget,
-  paceAllowance,
+  weekdayTime,
 } from './usage'
 import type { Limit } from './usage'
 
@@ -20,13 +22,20 @@ const clockText = (ms: number) => {
   return `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`
 }
 
-const hoursText =(resetsAt: string | null, now: number) => {
-  if (resetsAt === null) return ''
-  const hours = (Date.parse(resetsAt) - now) / 3600000
-  if (Number.isNaN(hours)) return ''
-  if (hours < 1) return ` Resets in ${Math.max(0, Math.round(hours * 60))} min`
+const parseReset = (resetsAt: string | null | undefined): number | null => {
+  if (resetsAt === null || resetsAt === undefined) return null
+  const ms = Date.parse(resetsAt)
 
-  return ` Resets in ${Math.round(hours)} h`
+  return Number.isNaN(ms) ? null : ms
+}
+
+const weeklyResetText = (resetsAt: string | null, now: number) => {
+  const reset = parseReset(resetsAt)
+  if (reset === null) return ''
+  const hours = (reset - now) / 3600000
+  const left = hours < 1 ? `${Math.max(0, Math.round(hours * 60))} min` : `${Math.round(hours)} h`
+
+  return ` Resets ${weekdayTime(reset)} (${left})`
 }
 
 async function record($: EngineInterface, limits: Limit[]) {
@@ -71,13 +80,15 @@ export const register: Register = on => {
     const available = availableToday(view.percentUsed, view.resetsAt, now)
     if (available === null) return { text: 'No weekly limit reading yet.' }
     const time = clockText(now)
+    const reset = parseReset(view.resetsAt)
+    const until = reset === null ? 'for today' : `until ${weekdayTime(endOfToday(reset, now))}`
 
     const stamp = refreshed ? `read ${time}` : 'could not refresh'
 
     const perHour = hourlyBudget(view.percentUsed, view.resetsAt, now)
     const hourly = perHour === null ? '' : `, ${perHour.toFixed(1)}% per hour to reset`
 
-    return { text: `${available.toFixed(1)}% available for today${hourly} (${stamp})` }
+    return { text: `${available.toFixed(1)}% available ${until}${hourly} (${stamp})` }
   })
 
   on('session.measure', async ($, e, next) => {
@@ -95,29 +106,36 @@ export const register: Register = on => {
     }
     const now = await $.clock.now()
     const available = availableToday(view.percentUsed, view.resetsAt, now)
-    const allowance = paceAllowance(view.resetsAt, now)
     const left = Math.round((100 - view.percentUsed) * 10) / 10
     const hourly = hourlyBudget(view.percentUsed, view.resetsAt, now)
+    const reset = parseReset(view.resetsAt)
     const headline =
-      available === null ? "Today's share unknown" : `${available.toFixed(1)}% available for today`
+      available === null || reset === null
+        ? "Today's share unknown"
+        : `${available.toFixed(1)}% available until ${weekdayTime(endOfToday(reset, now))}`
+    const usage = await $.session.usage()
+    const fiveHour = findLimit(usage.rateLimits, 'five_hour')
+    const fiveReset = parseReset(fiveHour?.resetsAt)
+    const cost = usage.cost
 
     return (
       <Box flexDirection="column">
         <Text bold>{headline}</Text>
         <Text>
-          Weekly: {view.percentUsed}% used, {left}% left.{hoursText(view.resetsAt, now)}
+          Weekly: {view.percentUsed}% used, {left}% left.{weeklyResetText(view.resetsAt, now)}
         </Text>
         {hourly !== null && (
           <Text>
             Hourly: {hourly.toFixed(1)}% per hour to reset (base 100% per hour)
           </Text>
         )}
-        {allowance !== null && view.resetsAt !== null && (
+        {fiveHour !== undefined && (
           <Text>
-            On pace to today's end at {clockText(endOfToday(Date.parse(view.resetsAt), now))}:{' '}
-            {allowance.toFixed(1)}% of the weekly limit
+            5-hour: {fiveHour.percentUsed}% used.
+            {fiveReset === null ? '' : ` Resets in ${durationText(fiveReset - now)}`}
           </Text>
         )}
+        {cost !== undefined && <Text dimColor>This session: ${cost.usd.toFixed(2)}</Text>}
       </Box>
     )
   })

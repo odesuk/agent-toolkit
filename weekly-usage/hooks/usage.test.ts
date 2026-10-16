@@ -1,6 +1,15 @@
 import { expect, test } from 'claude-code/testing'
 
-import { availableToday, computeWeek, endOfToday, hourlyBudget, paceAllowance } from './usage'
+import {
+  availableToday,
+  computeWeek,
+  durationText,
+  endOfToday,
+  findLimit,
+  hourlyBudget,
+  paceAllowance,
+  weekdayTime,
+} from './usage'
 
 const now = new Date(2026, 9, 15, 12, 0, 0).getTime()
 const hour = 3600000
@@ -67,4 +76,29 @@ test('no seven_day reading gives the no-reading view', () => {
   const view = computeWeek([{ kind: 'five_hour', percentUsed: 5 }])
   expect(view.percentUsed).toBe(null)
   expect(view.resetsAt).toBe(null)
+})
+
+test('weekdayTime formats local day and time', () => {
+  expect(weekdayTime(new Date(2026, 9, 16, 17, 0).getTime())).toBe('Fri 17:00')
+})
+
+test('durationText formats hours and minutes', () => {
+  expect(durationText(3 * 3600000 + 55 * 60000)).toBe('3 h 55 m')
+})
+
+test('durationText under an hour shows minutes only', () => {
+  expect(durationText(45 * 60000)).toBe('45 m')
+})
+
+test('durationText clamps negatives to zero', () => {
+  expect(durationText(-1)).toBe('0 m')
+})
+
+test('findLimit picks by kind', () => {
+  const limits = [
+    { kind: 'seven_day', percentUsed: 20 },
+    { kind: 'five_hour', percentUsed: 3 },
+  ]
+  expect(findLimit(limits, 'five_hour')?.percentUsed).toBe(3)
+  expect(findLimit(limits, 'spend_limit')).toBe(undefined)
 })

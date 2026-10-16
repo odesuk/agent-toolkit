@@ -7,8 +7,29 @@ const DAY = 24 * HOUR
 const WINDOW_HOURS = 168
 const DAY_SHARE = (100 * 24) / WINDOW_HOURS
 
+export const findLimit = (limits: Limit[], kind: string): Limit | undefined =>
+  limits.find(l => l.kind === kind)
+
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+export const weekdayTime = (ms: number): string => {
+  const at = new Date(ms)
+  const hh = String(at.getHours()).padStart(2, '0')
+  const mm = String(at.getMinutes()).padStart(2, '0')
+
+  return `${DAYS[at.getDay()]} ${hh}:${mm}`
+}
+
+export const durationText = (ms: number): string => {
+  const total = Math.max(0, Math.floor(ms / 60000))
+  const h = Math.floor(total / 60)
+  const m = total % 60
+
+  return h >= 1 ? `${h} h ${m} m` : `${m} m`
+}
+
 export const computeWeek = (limits: Limit[]): WeekView => {
-  const limit = limits.find(l => l.kind === 'seven_day')
+  const limit = findLimit(limits, 'seven_day')
 
   return { percentUsed: limit?.percentUsed ?? null, resetsAt: limit?.resetsAt ?? null }
 }
