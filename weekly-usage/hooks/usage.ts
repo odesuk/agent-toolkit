@@ -82,3 +82,76 @@ export const hourlyBudget = (
 
   return Math.round(((remainingDay * 24) / hours) * 10) / 10
 }
+
+export type SessionRecord = {
+  startedAt: number
+  lastSeen: number
+  usd: number
+  weeklyStart: number | null
+  weeklyLast: number | null
+  resetsAt: string | null
+  resetsAtLast: string | null
+}
+
+const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+const numberOrNull = (v: unknown): boolean => v === null || isNumber(v)
+const textOrNull = (v: unknown): boolean => v === null || typeof v === 'string'
+
+// Store data may come from older versions, so keep only well-formed records.
+// Records saved before resetsAtLast existed get null for it.
+export const parseRecords = (value: unknown): SessionRecord[] => {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .filter(
+      r =>
+        typeof r === 'object' &&
+        r !== null &&
+        isNumber(r.startedAt) &&
+        isNumber(r.lastSeen) &&
+        isNumber(r.usd) &&
+        numberOrNull(r.weeklyStart) &&
+        numberOrNull(r.weeklyLast) &&
+        textOrNull(r.resetsAt) &&
+        (r.resetsAtLast === undefined || textOrNull(r.resetsAtLast)),
+    )
+    .map(r => ({ ...r, resetsAtLast: r.resetsAtLast ?? null }))
+}
+
+export const upsertSession = (
+  records: SessionRecord[],
+  current: SessionRecord,
+  max = 10,
+): SessionRecord[] => {
+  const existing = records.find(r => r.startedAt === current.startedAt)
+  const merged =
+    existing === undefined
+      ? current
+      : {
+          ...current,
+          weeklyStart: existing.weeklyStart ?? current.weeklyStart,
+          resetsAt: existing.resetsAt ?? current.resetsAt,
+        }
+  const others = records.filter(r => r.startedAt !== current.startedAt)
+
+  return [...others, merged].sort((a, b) => a.startedAt - b.startedAt).slice(-max)
+}
+
+export const previousSessions = (
+  records: SessionRecord[],
+  currentStartedAt: number,
+  count = 3,
+): SessionRecord[] =>
+  records
+    .filter(r => r.startedAt < currentStartedAt)
+    .sort((a, b) => b.startedAt - a.startedAt)
+    .slice(0, count)
+
+// Rise in the weekly percent while the session ran; null if a reset fell in between.
+export const weeklyShare = (r: SessionRecord): number | null => {
+  if (r.weeklyStart === null || r.weeklyLast === null) return null
+  if (r.weeklyLast < r.weeklyStart) return null
+  if (r.resetsAt !== null && r.resetsAtLast !== null && r.resetsAt !== r.resetsAtLast) return null
+
+  return Math.round(r.weeklyLast - r.weeklyStart)
+}

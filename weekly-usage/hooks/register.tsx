@@ -9,11 +9,16 @@ import {
   findLimit,
   hourlyBudget,
   paceIcon,
+  parseRecords,
+  previousSessions,
+  upsertSession,
   weekdayTime,
+  weeklyShare,
 } from './usage'
 import type { Limit } from './usage'
 
 const PANE = 'weekly-usage'
+const SESSIONS = 'sessions'
 const REFRESH = 5 * 60000
 const week = atom({ plugin: 'weekly-usage', key: 'week' } as const, null)
 
@@ -43,13 +48,36 @@ async function record($: EngineInterface, limits: Limit[]) {
   await update($, week, () => computeWeek(limits))
 }
 
+async function track($: EngineInterface) {
+  try {
+    const usage = await $.session.usage()
+    const weekly = findLimit(usage.rateLimits, 'seven_day')
+    const current = {
+      startedAt: usage.startedAt,
+      lastSeen: await $.clock.now(),
+      usd: usage.cost?.usd ?? 0,
+      weeklyStart: weekly?.percentUsed ?? null,
+      weeklyLast: weekly?.percentUsed ?? null,
+      resetsAt: weekly?.resetsAt ?? null,
+      resetsAtLast: weekly?.resetsAt ?? null,
+    }
+    await $.store.set(SESSIONS, upsertSession(parseRecords(await $.store.get(SESSIONS)), current))
+  } catch {
+    // Tracking is best effort and must never break a hook.
+  }
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     void $.ui.open({ id: PANE, title: 'Weekly usage' })
     await $.store.delete('readings')
-    $.clock.every(REFRESH, () => $.ui.invalidate('ui.render'))
+    $.clock.every(REFRESH, () => {
+      void track($)
+      $.ui.invalidate('ui.render')
+    })
     const usage = await $.session.usage()
     await record($, usage.rateLimits)
+    await track($)
     await $.command.register({
       name: 'weekly-usage',
       description: 'Open the weekly usage pane and refresh it',
@@ -94,6 +122,7 @@ export const register: Register = on => {
 
   on('session.measure', async ($, e, next) => {
     await record($, e.rateLimits)
+    await track($)
 
     return next(e)
   })
@@ -118,6 +147,7 @@ export const register: Register = on => {
     const fiveHour = findLimit(usage.rateLimits, 'five_hour')
     const fiveReset = parseReset(fiveHour?.resetsAt)
     const cost = usage.cost
+    const previous = previousSessions(parseRecords(await $.store.get(SESSIONS)), usage.startedAt)
 
     return (
       <Box flexDirection="column">
@@ -137,6 +167,22 @@ export const register: Register = on => {
           </Text>
         )}
         {cost !== undefined && <Text dimColor>💲 This session: ${cost.usd.toFixed(2)}</Text>}
+        {previous.length > 0 && (
+          <Box flexDirection="column">
+            <Text dimColor>🕘 Recent sessions</Text>
+            {previous.map(r => {
+              const share = weeklyShare(r)
+
+              return (
+                <Text dimColor key={r.startedAt}>
+                  {'   '}
+                  {weekdayTime(r.startedAt)} · ${r.usd.toFixed(2)}
+                  {share === null ? '' : ` · about ${share}% of the weekly limit`}
+                </Text>
+              )
+            })}
+          </Box>
+        )}
       </Box>
     )
   })

@@ -40,6 +40,10 @@ The weekly-usage pane opens when a session starts. It refreshes every 5 minutes 
 ⏱️ Hourly: 112.7% per hour to reset (base 100% per hour)
 ⏳ 5-hour: 3% used. Resets in 3 h 55 m
 💲 This session: $4.12
+🕘 Recent sessions
+   Fri 14:05 · $4.12 · about 3% of the weekly limit
+   Thu 09:30 · $1.80 · about 1% of the weekly limit
+   Wed 16:45 · $0.95
 ```
 
 How to read the figures:
@@ -50,6 +54,7 @@ How to read the figures:
 - **Headline icon:** 🟢 50% or more of a day's share left, 🟡 15% to under 50%, 🔴 under 15%.
 - **5-hour line:** usage of the rolling 5-hour limit and the time until it resets. It is hidden when there is no 5-hour reading.
 - **This session:** what this chat has cost so far, not your account total. It is hidden when no cost is available.
+- **Recent sessions:** start time, cost and the rise in the weekly limit for up to 3 previous sessions, to compare them. Other sessions running at the same time also count, so the share is approximate.
 
 The pane needs a weekly limit reading from a Claude subscription. Without one, it shows: `No weekly limit reading. This needs a Claude subscription.`
 

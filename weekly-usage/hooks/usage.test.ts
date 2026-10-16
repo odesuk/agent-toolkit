@@ -9,8 +9,13 @@ import {
   hourlyBudget,
   paceAllowance,
   paceIcon,
+  parseRecords,
+  previousSessions,
+  upsertSession,
   weekdayTime,
+  weeklyShare,
 } from './usage'
+import type { SessionRecord } from './usage'
 
 const now = new Date(2026, 9, 15, 12, 0, 0).getTime()
 const hour = 3600000
@@ -111,4 +116,91 @@ test('paceIcon thresholds', () => {
   expect(paceIcon(15)).toBe('🟡')
   expect(paceIcon(14.9)).toBe('🔴')
   expect(paceIcon(-20)).toBe('🔴')
+})
+
+const rec = (startedAt: number, extra: Partial<SessionRecord> = {}): SessionRecord => ({
+  startedAt,
+  lastSeen: startedAt,
+  usd: 1,
+  weeklyStart: 10,
+  weeklyLast: 10,
+  resetsAt: null,
+  resetsAtLast: null,
+  ...extra,
+})
+
+test('upsertSession appends a new session sorted by start', () => {
+  const out = upsertSession([rec(5)], rec(2))
+  expect(out.map(r => r.startedAt)).toEqual([2, 5])
+})
+
+test('upsertSession replaces and keeps the original weeklyStart and resetsAt', () => {
+  const first = rec(5, { weeklyStart: 10, resetsAt: 'a' })
+  const out = upsertSession([first], rec(5, { usd: 3, weeklyStart: 14, weeklyLast: 14, resetsAt: 'b' }))
+  expect(out.length).toBe(1)
+  expect(out[0].usd).toBe(3)
+  expect(out[0].weeklyStart).toBe(10)
+  expect(out[0].weeklyLast).toBe(14)
+  expect(out[0].resetsAt).toBe('a')
+})
+
+test('upsertSession trims to the newest max', () => {
+  const out = upsertSession([rec(1), rec(2), rec(3)], rec(4), 2)
+  expect(out.map(r => r.startedAt)).toEqual([3, 4])
+})
+
+test('previousSessions picks the newest 3, newest first', () => {
+  const records = [rec(1), rec(2), rec(3), rec(4), rec(5)]
+  expect(previousSessions(records, 5).map(r => r.startedAt)).toEqual([4, 3, 2])
+})
+
+test('previousSessions excludes the current and later ones', () => {
+  const records = [rec(1), rec(3), rec(5), rec(7)]
+  expect(previousSessions(records, 5).map(r => r.startedAt)).toEqual([3, 1])
+})
+
+test('previousSessions with fewer than 3 is fine', () => {
+  expect(previousSessions([rec(1)], 5).length).toBe(1)
+  expect(previousSessions([rec(5)], 5)).toEqual([])
+})
+
+test('upsertSession fills a null start from the current reading', () => {
+  const first = rec(5, { weeklyStart: null, weeklyLast: null, resetsAt: null })
+  const out = upsertSession([first], rec(5, { weeklyStart: 8, weeklyLast: 8, resetsAt: 'r' }))
+  expect(out[0].weeklyStart).toBe(8)
+  expect(out[0].resetsAt).toBe('r')
+})
+
+test('weeklyShare is null when the reset changed during the session', () => {
+  expect(weeklyShare(rec(1, { weeklyLast: 15, resetsAt: 'a', resetsAtLast: 'b' }))).toBe(null)
+  expect(weeklyShare(rec(1, { weeklyLast: 15, resetsAt: 'a', resetsAtLast: 'a' }))).toBe(5)
+})
+
+test('parseRecords accepts old records without resetsAtLast', () => {
+  const { resetsAtLast, ...old } = rec(1)
+  expect(parseRecords([old])).toEqual([rec(1)])
+})
+
+test('weeklyShare is the rounded rise', () => {
+  expect(weeklyShare(rec(1, { weeklyStart: 10, weeklyLast: 12.6 }))).toBe(3)
+})
+
+test('weeklyShare is null when a reading is missing', () => {
+  expect(weeklyShare(rec(1, { weeklyStart: null }))).toBe(null)
+  expect(weeklyShare(rec(1, { weeklyLast: null }))).toBe(null)
+})
+
+test('weeklyShare is null when the value fell', () => {
+  expect(weeklyShare(rec(1, { weeklyStart: 50, weeklyLast: 2 }))).toBe(null)
+})
+
+test('parseRecords drops malformed entries', () => {
+  const good = rec(1)
+  const out = parseRecords([good, null, 'x', { startedAt: 'a' }, { ...good, usd: undefined }])
+  expect(out).toEqual([good])
+})
+
+test('parseRecords returns an empty list for non-arrays', () => {
+  expect(parseRecords(undefined)).toEqual([])
+  expect(parseRecords({ a: 1 })).toEqual([])
 })
