@@ -56,6 +56,17 @@ How to read the figures:
 - **This session:** what this chat has cost so far, not your account total. It is hidden when no cost is available.
 - **Recent sessions:** start time, cost and the rise in the weekly limit for up to 3 previous sessions, to compare them. Other sessions running at the same time also count, so the share is approximate.
 
+### How the dollar figures are calculated
+
+The mod does not calculate cost itself. It shows the figure that Claude Code reports through its plugin API (`$.session.usage().cost.usd`). Claude Code describes this figure as US dollars summed over every priced API response in the session, the same total that `/cost` shows.
+
+- **It is an estimate, not a bill.** On a Claude subscription (Pro or Max), you pay a fixed price. The figure is what the same usage would cost at API prices. It does not change what you pay.
+- **It covers one session only.** It is not your account total. A resumed session counts from its first launch. `/clear` starts the count again.
+- **Recent sessions show the last saved value.** The mod saves each session's cost at start, when usage changes, and every 5 minutes. A session that ends between saves can show a slightly lower cost than its final total.
+- **The mod cannot check the figure.** If Claude Code leaves out some usage, the mod leaves it out too. For example, the mod cannot confirm whether subagent usage is included.
+
+Use the dollar figures to compare sessions, not as an exact cost.
+
 The pane needs a weekly limit reading from a Claude subscription. Without one, it shows: `No weekly limit reading. This needs a Claude subscription.`
 
 ## Notes
