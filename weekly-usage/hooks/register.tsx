@@ -177,13 +177,13 @@ export const register: Register = on => {
         {previous.length > 0 && (
           <Box flexDirection="column">
             <Text dimColor>🕘 Recent sessions</Text>
-            {previous.map(r => {
+            {[...previous].sort((a, b) => b.usd - a.usd).map(r => {
               const share = weeklyShare(r)
 
               return (
                 <Text dimColor key={r.startedAt}>
                   {'   '}
-                  {weekdayTime(r.startedAt)} · ${r.usd.toFixed(2)}
+                  {weekdayTime(r.startedAt)} · {durationText(r.lastSeen - r.startedAt)} · ${r.usd.toFixed(2)}
                   {share === null ? '' : ` · about ${share}% of the weekly limit`}
                 </Text>
               )

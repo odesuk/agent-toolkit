@@ -41,9 +41,9 @@ The weekly-usage pane opens when a session starts. It refreshes every 5 minutes 
 ⏳ 5-hour: 3% used. Resets in 3 h 55 m
 💲 This session: $4.12 · running for 1 h 12 m
 🕘 Recent sessions
-   Fri 14:05 · $4.12 · about 3% of the weekly limit
-   Thu 09:30 · $1.80 · about 1% of the weekly limit
-   Wed 16:45 · $0.95
+   Fri 14:05 · 42 min · $4.12 · about 3% of the weekly limit
+   Thu 09:30 · 25 min · $1.80 · about 1% of the weekly limit
+   Wed 16:45 · 1 h 3 m · $0.95
 ```
 
 How to read the figures:
@@ -54,7 +54,7 @@ How to read the figures:
 - **Headline icon:** 🟢 50% or more of a day's share left, 🟡 15% to under 50%, 🔴 under 15%.
 - **5-hour line:** usage of the rolling 5-hour limit and the time until it resets. It is hidden when there is no 5-hour reading.
 - **This session:** what this chat has cost so far, not your account total, and how long it has run. The run time counts from the session's first launch; /clear starts it over. The pane refreshes every 5 minutes, so the run time updates at that interval. It is hidden when there is no usage reading.
-- **Recent sessions:** start time, cost and the rise in the weekly limit for up to 3 previous sessions, to compare them. Other sessions running at the same time also count, so the share is approximate.
+- **Recent sessions:** start time, run time, cost and the rise in the weekly limit for the 3 previous sessions, sorted by cost, highest first. The run time runs from the session's first save to its last save, so it can be shorter than the real time. Other sessions running at the same time also count, so the share is approximate.
 
 ### How the dollar figures are calculated
 
