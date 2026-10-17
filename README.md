@@ -39,7 +39,7 @@ The weekly-usage pane opens when a session starts. It refreshes every 5 minutes 
 📅 Weekly: 20% used, 80% left. Resets Tue 17:00 (119 h)
 ⏱️ Hourly: 112.7% per hour to reset (base 100% per hour)
 ⏳ 5-hour: 3% used. Resets in 3 h 55 m
-💲 This session: $4.12 · running 1 h 12 m
+💲 This session: $4.12 · running for 1 h 12 m
 🕘 Recent sessions
    Fri 14:05 · $4.12 · about 3% of the weekly limit
    Thu 09:30 · $1.80 · about 1% of the weekly limit

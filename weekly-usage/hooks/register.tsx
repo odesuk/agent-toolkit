@@ -168,11 +168,11 @@ export const register: Register = on => {
         )}
         {cost !== undefined && (
           <Text dimColor>
-            💲 This session: ${cost.usd.toFixed(2)} · running {durationText(now - usage.startedAt)}
+            💲 This session: ${cost.usd.toFixed(2)} · running for {durationText(now - usage.startedAt)}
           </Text>
         )}
         {cost === undefined && (
-          <Text dimColor>🕒 This session: running {durationText(now - usage.startedAt)}</Text>
+          <Text dimColor>🕒 This session: running for {durationText(now - usage.startedAt)}</Text>
         )}
         {previous.length > 0 && (
           <Box flexDirection="column">
