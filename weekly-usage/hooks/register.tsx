@@ -7,6 +7,7 @@ import {
   durationText,
   endOfToday,
   findLimit,
+  hasActivity,
   hourlyBudget,
   paceIcon,
   parseRecords,
@@ -147,7 +148,7 @@ export const register: Register = on => {
     const fiveHour = findLimit(usage.rateLimits, 'five_hour')
     const fiveReset = parseReset(fiveHour?.resetsAt)
     const cost = usage.cost
-    const previous = previousSessions(parseRecords(await $.store.get(SESSIONS)), usage.startedAt)
+    const previous = previousSessions(parseRecords(await $.store.get(SESSIONS)).filter(hasActivity), usage.startedAt)
 
     return (
       <Box flexDirection="column">

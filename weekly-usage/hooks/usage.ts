@@ -147,6 +147,9 @@ export const previousSessions = (
     .sort((a, b) => b.startedAt - a.startedAt)
     .slice(0, count)
 
+// A session is listed only when it cost more than $0 and ran for at least one minute.
+export const hasActivity = (r: SessionRecord): boolean => r.usd > 0 && r.lastSeen - r.startedAt >= 60000
+
 // Rise in the weekly percent while the session ran; null if a reset fell in between.
 export const weeklyShare = (r: SessionRecord): number | null => {
   if (r.weeklyStart === null || r.weeklyLast === null) return null

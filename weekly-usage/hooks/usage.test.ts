@@ -6,6 +6,7 @@ import {
   durationText,
   endOfToday,
   findLimit,
+  hasActivity,
   hourlyBudget,
   paceAllowance,
   paceIcon,
@@ -162,6 +163,18 @@ test('previousSessions excludes the current and later ones', () => {
 test('previousSessions with fewer than 3 is fine', () => {
   expect(previousSessions([rec(1)], 5).length).toBe(1)
   expect(previousSessions([rec(5)], 5)).toEqual([])
+})
+
+test('hasActivity needs a cost above zero', () => {
+  expect(hasActivity(rec(0, { usd: 0, lastSeen: 10 * 60000 }))).toBe(false)
+})
+
+test('hasActivity needs at least one minute', () => {
+  expect(hasActivity(rec(0, { usd: 1, lastSeen: 59000 }))).toBe(false)
+})
+
+test('hasActivity keeps a session with cost and a minute', () => {
+  expect(hasActivity(rec(0, { usd: 0.5, lastSeen: 60000 }))).toBe(true)
 })
 
 test('upsertSession fills a null start from the current reading', () => {

@@ -54,7 +54,7 @@ How to read the figures:
 - **Headline icon:** 🟢 50% or more of a day's share left, 🟡 15% to under 50%, 🔴 under 15%.
 - **5-hour line:** usage of the rolling 5-hour limit and the time until it resets. It is hidden when there is no 5-hour reading.
 - **This session:** what this chat has cost so far, not your account total, and how long it has run. The run time counts from the session's first launch; /clear starts it over. The pane refreshes every 5 minutes, so the run time updates at that interval. It is hidden when there is no usage reading.
-- **Recent sessions:** start time, run time, cost and the rise in the weekly limit for the 3 previous sessions, sorted by cost, highest first. The run time runs from the session's first save to its last save, so it can be shorter than the real time. Other sessions running at the same time also count, so the share is approximate.
+- **Recent sessions:** start time, run time, cost and the rise in the weekly limit for the 3 previous sessions, sorted by cost, highest first. The run time runs from the session's first save to its last save, so it can be shorter than the real time. Only sessions that cost more than $0 and ran for at least one minute are listed. Other sessions running at the same time also count, so the share is approximate.
 
 ### How the dollar figures are calculated
 
