@@ -8,6 +8,7 @@ Mods and skills for AI coding agents.
 | --- | --- | --- |
 | weekly-usage | Claude Code | Shows the share of the weekly usage limit left for today, and the hourly budget until the reset. |
 | mod-switch | Claude Code | Lists installed plugins and skills in a pane. Switches each one on or off. |
+| agents-list | Claude Code | Lists the agents of the session in a pane, with what each one is doing. |
 
 ## Install (Claude Code)
 
@@ -96,6 +97,35 @@ How each tab works:
 - **Limit:** turning a skill on removes its override. An override with another mode, such as `name-only`, is lost.
 - **Config folder:** the mod uses `CLAUDE_CONFIG_DIR` if set. Otherwise it uses `.claude` in your home folder.
 
+## agents-list: usage
+
+Install it the same way as weekly-usage, with `agents-list` as the name:
+
+```
+/plugin install agents-list --marketplace odesuk/agent-toolkit
+```
+
+Run `/agents-list` to open the pane. It lists the subagents and teammates of the session. A child agent is indented under the agent that started it. Each entry has three lines: the status with the name and type, the task description, and the last tool call. This sample uses made-up agents:
+
+```
+running Explore
+find the usages of weekly-usage
+now: Grep weekly-usage (7 tool calls)
+
+  idle Plan
+  plan the change
+  last: Read /c/_DEV/odesuk-agent-toolkit/README.md (2 tool calls)
+```
+
+How to read the entries:
+
+- **Status:** `running`, `waiting`, `idle`, `done`, `failed`, `stopped` or `pending`. A teammate that waits for a message is `idle`.
+- **Name:** the name of the agent if it has one, with its type beside it. Otherwise the type.
+- **Tool call:** the line shows `now` while the agent runs and `last` after that. It shows the tool and the file, command or pattern it works on.
+- **Count:** the mod counts the tool calls it saw since it loaded. An agent that started earlier shows only the calls after the load.
+- **Refresh:** the list updates when an agent starts, when an agent makes a tool call and when a turn ends. Press Refresh to read it again.
+- **Not listed:** the main conversation is not in the list. Agents of a workflow are not in the list either.
+
 ## Notes
 
-- weekly-usage and mod-switch use the Claude Code plugin API. They do not run in Codex or Antigravity.
+- weekly-usage, mod-switch and agents-list use the Claude Code plugin API. They do not run in Codex or Antigravity.

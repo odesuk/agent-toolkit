@@ -1,0 +1,7 @@
+{
+  "name": "agents-list",
+  "version": "0.1.0",
+  "description": "Lists the agents of this session and what each one is doing.",
+  "author": { "name": "odesuk" },
+  "types": "./types/index.d.ts"
+}
