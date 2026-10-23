@@ -1,4 +1,4 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, mock, test } from 'claude-code/testing'
 
 import { mergeSkills, setSkill } from './lib'
 
@@ -42,7 +42,7 @@ test('setSkill edits skillOverrides alone and keeps the rest', () => {
   expect(() => setSkill('{ not json', 'a', false)).toThrow()
 })
 
-test('the pane lists a skill on every surface', async ($, on) => {
+test('the pane says when it has no rows, on every surface', async ($, on) => {
   on('command.register', () => ({ value: { command: 'mod-switch' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
 
@@ -51,4 +51,80 @@ test('the pane lists a skill on every surface', async ($, on) => {
     expect(await ui.find({ type: 'Text', text: /None found/ })).toBeDefined()
     await ui.unmount()
   }
+})
+
+// The host side of the mod, answered from memory: what `claude` and the
+// settings file would give, and a record of every call that changes something.
+function host(on: Parameters<Parameters<typeof test>[1]>[1]) {
+  const ran: string[][] = []
+  const wrote: Record<string, string> = {}
+  mock.env(on, { CLAUDE_CONFIG_DIR: '/cfg' })
+  on('command.register', () => ({ value: { command: 'mod-switch' } }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('session.usage', () => ({
+    value: {
+      startedAt: 0,
+      rateLimits: [],
+      context: {
+        window: 1,
+        breakdown: {
+          skills: { skillFrontmatter: [{ name: 'x', source: 'userSettings', tokens: 1 }] },
+        },
+      },
+    } as never,
+  }))
+  on('fs.read', () => ({ value: '{ "model": "opus" }\n' }))
+  on('fs.write', (_, e) => {
+    wrote[e.path] = e.text
+
+    return { value: undefined }
+  })
+  on('process.run', (_, e) => {
+    ran.push([...e.argv])
+    const list = [
+      { id: 'a@m', version: '1', scope: 'user', enabled: true },
+      { id: 'b@m', version: '2', scope: 'user', enabled: false },
+    ]
+
+    return {
+      value: { exitCode: 0, stdout: e.argv[2] === 'list' ? JSON.stringify(list) : '', stderr: '' },
+    }
+  })
+
+  return { ran, wrote }
+}
+
+test('each row has an ON or OFF button that a press turns into a switch', async ($, on) => {
+  const { ran } = host(on)
+  await $.command.run({ command: 'mod-switch' })
+
+  for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
+    const ui = await $.ui.mount({ ...PANE, surface })
+    expect((await ui.find({ type: 'Button', key: 'p:a@m:user' }))?.text).toBe('ON')
+    expect((await ui.find({ type: 'Button', key: 'p:b@m:user' }))?.text).toBe('OFF')
+
+    ran.length = 0
+    await ui.press({ key: 'p:a@m:user' })
+    await ui.press({ key: 'p:b@m:user' })
+    expect(ran).toContainEqual(['claude', 'plugin', 'disable', 'a@m', '--scope', 'user'])
+    expect(ran).toContainEqual(['claude', 'plugin', 'enable', 'b@m', '--scope', 'user'])
+    await ui.unmount()
+  }
+})
+
+test('pressing a skill button writes skillOverrides after a backup', async ($, on) => {
+  const { wrote } = host(on)
+  await $.command.run({ command: 'mod-switch' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  await ui.press({ key: 'tab-skills' })
+  await ui.press({ key: 's:x' })
+
+  // The test host may spell the path with a drive, so match the file name.
+  const file = (name: string) => Object.entries(wrote).find(([path]) => path.endsWith(name))?.[1]
+  expect(file('settings.json.bak-mod-switch')).toBe('{ "model": "opus" }\n')
+  expect(JSON.parse(file('settings.json') ?? '{}')).toEqual({
+    model: 'opus',
+    skillOverrides: { x: 'off' },
+  })
+  await ui.unmount()
 })

@@ -134,15 +134,25 @@ export const register: Register = on => {
           </Button>
         </Box>
         <Text dimColor>
-          {onCount} on, {rows.length - onCount} off. Press a row to switch it.
+          {onCount} on, {rows.length - onCount} off. Press ON or OFF to switch an item.
         </Text>
         {message !== '' && <Text>{message}</Text>}
         {rows.length === 0 && <Text dimColor>None found. Press Refresh.</Text>}
         {rows.map(r => (
-          <Button key={r.key} plain onPress={r.flip}>
-            {r.isOn ? '[x] ' : '[ ] '}
-            {r.label} <Text dimColor>{r.hint}</Text>
-          </Button>
+          <Box gap={1}>
+            <Box minWidth={7}>
+              <Button
+                key={r.key}
+                variant={r.isOn ? 'primary' : undefined}
+                dimColor={!r.isOn}
+                onPress={r.flip}
+              >
+                {r.isOn ? 'ON' : 'OFF'}
+              </Button>
+            </Box>
+            <Text dimColor={!r.isOn}>{r.label}</Text>
+            <Text dimColor>{r.hint}</Text>
+          </Box>
         ))}
       </Box>
     )

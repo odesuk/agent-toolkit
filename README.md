@@ -78,14 +78,14 @@ Install it the same way as weekly-usage, with `mod-switch` as the name:
 /plugin install mod-switch --marketplace odesuk/agent-toolkit
 ```
 
-Run `/mod-switch` to open the pane. It has two tabs, Plugins and Skills. Each row shows `[x]` for on or `[ ]` for off. Press a row to switch it. Press Refresh to read the lists again.
+Run `/mod-switch` to open the pane. It has two tabs, Plugins and Skills. Each row has a toggle button that shows ON or OFF. Press the button to switch the item. An ON button is drawn in the accent color. The name of an OFF item is dim. Press Refresh to read the lists again.
 
 ```
 Plugins  Skills  Refresh
-2 on, 1 off. Press a row to switch it.
-[x] cache-tax@claude-code-mods 2.2.1
-[x] frontend-design@claude-plugins-official 465f09344424
-[ ] atlassian@claude-plugins-official b74220d41142
+2 on, 1 off. Press ON or OFF to switch an item.
+[ ON ]  cache-tax@claude-code-mods 2.2.1
+[ ON ]  frontend-design@claude-plugins-official 465f09344424
+[ OFF ] atlassian@claude-plugins-official b74220d41142
 ```
 
 How each tab works:
