@@ -1,6 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 
-import { mergeSkills, setSkill } from './lib'
+import { canSwitch, mergeSkills, setSkill } from './lib'
 
 const PANE = {
   plugin: 'mod-switch',
@@ -30,6 +30,11 @@ test('mergeSkills adds the skills the settings switch off, on last', () => {
     'finance:audit=false',
     'legal:brief=false',
   ])
+})
+
+test('canSwitch holds the scopes the claude CLI takes', () => {
+  expect(['user', 'project', 'local'].map(canSwitch)).toEqual([true, true, true])
+  expect(['session', 'synced'].map(canSwitch)).toEqual([false, false])
 })
 
 test('setSkill edits skillOverrides alone and keeps the rest', () => {
@@ -84,6 +89,7 @@ function host(on: Parameters<Parameters<typeof test>[1]>[1]) {
     const list = [
       { id: 'a@m', version: '1', scope: 'user', enabled: true },
       { id: 'b@m', version: '2', scope: 'user', enabled: false },
+      { id: 'c@inline', version: '3', scope: 'session', enabled: true },
     ]
 
     return {
@@ -102,6 +108,9 @@ test('each row has an ON or OFF button that a press turns into a switch', async 
     const ui = await $.ui.mount({ ...PANE, surface })
     expect((await ui.find({ type: 'Button', key: 'p:a@m:user' }))?.text).toBe('ON')
     expect((await ui.find({ type: 'Button', key: 'p:b@m:user' }))?.text).toBe('OFF')
+    // The CLI refuses the session scope, so that row has no button to press.
+    expect(await ui.find({ type: 'Button', key: 'p:c@inline:session' })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /session plugin: cannot switch here/ })).toBeDefined()
 
     ran.length = 0
     await ui.press({ key: 'p:a@m:user' })

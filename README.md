@@ -92,6 +92,7 @@ Plugins  Skills  Refresh
 How each tab works:
 
 - **Plugins:** the mod reads `claude plugin list --json` and runs `claude plugin enable` or `claude plugin disable` for the scope of the row. A plugin change takes effect after you run `/reload-plugins`.
+- **Fixed rows:** a plugin loaded for one session only (with `--plugin-dir`) or synced from your account shows a plain `on` or `off` with no button. The `claude` command cannot change those.
 - **Skills:** the on rows are the skills in the session's skill listing. The off rows come from `skillOverrides` in your `settings.json`. A switch sets `"<skill>": "off"` in `skillOverrides`, or removes that entry to turn the skill on.
 - **Safety:** before a skill change, the mod saves the old file as `settings.json.bak-mod-switch` beside it. If `settings.json` is not valid JSON, the mod changes nothing and shows the reason in the pane.
 - **Limit:** turning a skill on removes its override. An override with another mode, such as `name-only`, is lost.

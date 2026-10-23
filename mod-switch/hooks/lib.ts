@@ -6,6 +6,10 @@ type Listed = { name: string; source: string; pluginName?: string }
 export const skillKey = (s: Listed) =>
   s.pluginName && !s.name.includes(':') ? `${s.pluginName}:${s.name}` : s.name
 
+// `claude plugin enable` and `disable` take these scopes only. A plugin loaded
+// for the session alone (`--plugin-dir`) or synced from an account has another.
+export const canSwitch = (scope: string) => ['user', 'project', 'local'].includes(scope)
+
 // A listed skill is on unless an override turns it off. An "off" override is
 // no longer listed, so it is added from the settings alone.
 export function mergeSkills(

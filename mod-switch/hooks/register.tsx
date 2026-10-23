@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { PluginRow, SkillRow } from '../types'
-import { mergeSkills, setSkill } from './lib'
+import { canSwitch, mergeSkills, setSkill } from './lib'
 
 const PANE = 'mod-switch'
 const tab = atom({ plugin: 'mod-switch', key: 'tab' } as const, 'plugins')
@@ -54,7 +54,7 @@ async function flipPlugin($: EngineInterface, p: PluginRow) {
   await say(
     $,
     run.exitCode === 0
-      ? `${p.id}: ${verb}d. Run /reload-plugins to apply it.`
+      ? `${p.id}: ${verb}d in settings. It stays as it is in this session until you run /reload-plugins.`
       : `Not changed: ${(run.stderr || run.stdout).trim()}`,
   )
 }
@@ -99,8 +99,9 @@ export const register: Register = on => {
         ? (await read($, plugins)).map(p => ({
             key: `p:${p.id}:${p.scope}`,
             label: p.id,
-            hint: p.version,
+            hint: canSwitch(p.scope) ? p.version : `${p.version} (${p.scope} plugin: cannot switch here)`,
             isOn: p.isOn,
+            canFlip: canSwitch(p.scope),
             flip: () => flipPlugin($, p),
           }))
         : (await read($, skills)).map(s => ({
@@ -108,6 +109,7 @@ export const register: Register = on => {
             label: s.key,
             hint: s.source,
             isOn: s.isOn,
+            canFlip: true,
             flip: () => flipSkill($, s),
           }))
     const onCount = rows.filter(r => r.isOn).length
@@ -141,14 +143,18 @@ export const register: Register = on => {
         {rows.map(r => (
           <Box gap={1}>
             <Box minWidth={7}>
-              <Button
-                key={r.key}
-                variant={r.isOn ? 'primary' : undefined}
-                dimColor={!r.isOn}
-                onPress={r.flip}
-              >
-                {r.isOn ? 'ON' : 'OFF'}
-              </Button>
+              {r.canFlip ? (
+                <Button
+                  key={r.key}
+                  variant={r.isOn ? 'primary' : undefined}
+                  dimColor={!r.isOn}
+                  onPress={r.flip}
+                >
+                  {r.isOn ? 'ON' : 'OFF'}
+                </Button>
+              ) : (
+                <Text dimColor>{r.isOn ? 'on' : 'off'}</Text>
+              )}
             </Box>
             <Text dimColor={!r.isOn}>{r.label}</Text>
             <Text dimColor>{r.hint}</Text>
