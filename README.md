@@ -7,6 +7,7 @@ Mods and skills for AI coding agents.
 | Name | Works with | What it does |
 | --- | --- | --- |
 | weekly-usage | Claude Code | Shows the share of the weekly usage limit left for today, and the hourly budget until the reset. |
+| mod-switch | Claude Code | Lists installed plugins and skills in a pane. Switches each one on or off. |
 
 ## Install (Claude Code)
 
@@ -69,6 +70,32 @@ Use the dollar figures to compare sessions, not as an exact cost.
 
 The pane needs a weekly limit reading from a Claude subscription. Without one, it shows: `No weekly limit reading. This needs a Claude subscription.`
 
+## mod-switch: usage
+
+Install it the same way as weekly-usage, with `mod-switch` as the name:
+
+```
+/plugin install mod-switch --marketplace odesuk/agent-toolkit
+```
+
+Run `/mod-switch` to open the pane. It has two tabs, Plugins and Skills. Each row shows `[x]` for on or `[ ]` for off. Press a row to switch it. Press Refresh to read the lists again.
+
+```
+Plugins  Skills  Refresh
+2 on, 1 off. Press a row to switch it.
+[x] cache-tax@claude-code-mods 2.2.1
+[x] frontend-design@claude-plugins-official 465f09344424
+[ ] atlassian@claude-plugins-official b74220d41142
+```
+
+How each tab works:
+
+- **Plugins:** the mod reads `claude plugin list --json` and runs `claude plugin enable` or `claude plugin disable` for the scope of the row. A plugin change takes effect after you run `/reload-plugins`.
+- **Skills:** the on rows are the skills in the session's skill listing. The off rows come from `skillOverrides` in your `settings.json`. A switch sets `"<skill>": "off"` in `skillOverrides`, or removes that entry to turn the skill on.
+- **Safety:** before a skill change, the mod saves the old file as `settings.json.bak-mod-switch` beside it. If `settings.json` is not valid JSON, the mod changes nothing and shows the reason in the pane.
+- **Limit:** turning a skill on removes its override. An override with another mode, such as `name-only`, is lost.
+- **Config folder:** the mod uses `CLAUDE_CONFIG_DIR` if set. Otherwise it uses `.claude` in your home folder.
+
 ## Notes
 
-- weekly-usage uses the Claude Code plugin API. It does not run in Codex or Antigravity.
+- weekly-usage and mod-switch use the Claude Code plugin API. They do not run in Codex or Antigravity.

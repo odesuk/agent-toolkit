@@ -1,0 +1,7 @@
+{
+  "name": "mod-switch",
+  "version": "0.1.0",
+  "description": "Lists installed plugins and skills and switches each one on or off.",
+  "author": { "name": "odesuk" },
+  "types": "./types/index.d.ts"
+}

@@ -2,5 +2,8 @@
   "name": "agent-toolkit",
   "owner": { "name": "odesuk" },
   "description": "Mods and skills for AI coding agents.",
-  "plugins": [{ "name": "weekly-usage", "source": "./weekly-usage" }]
+  "plugins": [
+    { "name": "weekly-usage", "source": "./weekly-usage" },
+    { "name": "mod-switch", "source": "./mod-switch" }
+  ]
 }
