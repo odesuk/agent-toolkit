@@ -106,26 +106,35 @@ Install it the same way as weekly-usage, with `agents-list` as the name:
 /plugin install agents-list --marketplace odesuk/agent-toolkit
 ```
 
-Run `/agents-list` to open the pane. It lists the subagents and teammates of the session. A child agent is indented under the agent that started it. Each entry has three lines: the status with the name and type, the task description, and the last tool call. This sample uses made-up agents:
+Run `/agents-list` to open the pane. It lists the main conversation first, then the subagents and teammates of the session. A child agent is indented under the agent that started it. This sample uses made-up agents:
 
 ```
-running Explore
-find the usages of weekly-usage
-now: Grep weekly-usage (7 tool calls)
+2 agents, 1 running.
 
-  idle Plan
-  plan the change
-  last: Read /c/_DEV/odesuk-agent-toolkit/README.md (2 tool calls)
+running main conversation
+fix the bug
+now: Read src/app.ts (4 tool calls)
+
+  running Explore 1 m 5 s [ Stop ]
+  find the usages
+  task: Search the repo for weekly-usage
+  now: Grep weekly-usage (7 tool calls)
+
+    idle Plan
+    plan the change
+    last: Read README.md (2 tool calls)
 ```
 
 How to read the entries:
 
+- **Header:** the status, the name or type, and the run time. A running agent has a Stop button.
 - **Status:** `running`, `waiting`, `idle`, `done`, `failed`, `stopped` or `pending`. A teammate that waits for a message is `idle`.
-- **Name:** the name of the agent if it has one, with its type beside it. Otherwise the type.
-- **Tool call:** the line shows `now` while the agent runs and `last` after that. It shows the tool and the file, command or pattern it works on.
+- **Run time:** the time since the mod first saw the agent. For a finished agent it stops at the time the mod saw it end. An idle agent shows none. The time updates every 5 seconds while an agent runs.
+- **Lines:** the description of the agent, the first line of its task prompt, and its tool call. The tool call line shows `now` while the agent runs and `last` after that. It shows the tool and the file, command or pattern it works on.
 - **Count:** the mod counts the tool calls it saw since it loaded. An agent that started earlier shows only the calls after the load.
-- **Refresh:** the list updates when an agent starts, when an agent makes a tool call and when a turn ends. Press Refresh to read it again.
-- **Not listed:** the main conversation is not in the list. Agents of a workflow are not in the list either.
+- **Stop:** the button runs the `TaskStop` tool with the id of the agent. The pane shows the answer of the tool under the counts. The main conversation has no Stop button.
+- **Refresh:** the list updates when an agent starts, when a turn starts or ends and when an agent makes a tool call. Press Refresh to read it again.
+- **Not listed:** agents of a workflow are not in the list.
 
 ## Notes
 

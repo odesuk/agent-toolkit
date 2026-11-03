@@ -6,8 +6,22 @@ export type AgentRow = {
   status: string
   parentId: string
 }
-export type AgentLast = { tool: string; detail: string; calls: number }
-export type AgentBoard = { agents: AgentRow[]; last: Record<string, AgentLast> }
+// `start` and `end` are in milliseconds; 0 means not known yet, or not ended.
+export type AgentNote = {
+  tool: string
+  detail: string
+  calls: number
+  task: string
+  start: number
+  end: number
+}
+export type AgentBoard = {
+  agents: AgentRow[]
+  notes: Record<string, AgentNote>
+  main: { isRunning: boolean; task: string }
+  now: number
+  note: string
+}
 
 declare module 'claude-code' {
   interface PluginState {
