@@ -11,6 +11,7 @@ import {
   hourlyBudget,
   paceIcon,
   parseRecords,
+  parseReset,
   previousSessions,
   upsertSession,
   weekdayTime,
@@ -27,13 +28,6 @@ const clockText = (ms: number) => {
   const at = new Date(ms)
 
   return `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`
-}
-
-const parseReset = (resetsAt: string | null | undefined): number | null => {
-  if (resetsAt === null || resetsAt === undefined) return null
-  const ms = Date.parse(resetsAt)
-
-  return Number.isNaN(ms) ? null : ms
 }
 
 const weeklyResetText = (resetsAt: string | null, now: number) => {
@@ -76,8 +70,12 @@ export const register: Register = on => {
       void track($)
       $.ui.invalidate('ui.render')
     })
-    const usage = await $.session.usage()
-    await record($, usage.rateLimits)
+    try {
+      const usage = await $.session.usage()
+      await record($, usage.rateLimits)
+    } catch {
+      // The reading is best effort; the start must still reach the rest of the chain.
+    }
     await track($)
     await $.command.register({
       name: 'weekly-usage',

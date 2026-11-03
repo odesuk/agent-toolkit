@@ -10,6 +10,13 @@ const DAY_SHARE = (100 * 24) / WINDOW_HOURS
 export const findLimit = (limits: Limit[], kind: string): Limit | undefined =>
   limits.find(l => l.kind === kind)
 
+export const parseReset = (resetsAt: string | null | undefined): number | null => {
+  if (resetsAt === null || resetsAt === undefined) return null
+  const ms = Date.parse(resetsAt)
+
+  return Number.isNaN(ms) ? null : ms
+}
+
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export const weekdayTime = (ms: number): string => {
@@ -44,9 +51,8 @@ export const endOfToday = (reset: number, now: number): number => {
 
 // Share of the weekly limit that has accrued by the end of today.
 export const paceAllowance = (resetsAt: string | null, now: number): number | null => {
-  if (resetsAt === null) return null
-  const reset = Date.parse(resetsAt)
-  if (Number.isNaN(reset)) return null
+  const reset = parseReset(resetsAt)
+  if (reset === null) return null
   const windowStart = reset - WINDOW_HOURS * HOUR
   const elapsed = Math.min(WINDOW_HOURS, Math.max(0, (endOfToday(reset, now) - windowStart) / HOUR))
 
@@ -73,9 +79,8 @@ export const hourlyBudget = (
   resetsAt: string | null,
   now: number,
 ): number | null => {
-  if (resetsAt === null) return null
-  const reset = Date.parse(resetsAt)
-  if (Number.isNaN(reset)) return null
+  const reset = parseReset(resetsAt)
+  if (reset === null) return null
   const hours = (reset - now) / HOUR
   if (hours <= 0) return null
   const remainingDay = ((100 - percentUsed) / DAY_SHARE) * 100
