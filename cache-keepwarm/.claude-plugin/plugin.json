@@ -1,0 +1,6 @@
+{
+  "name": "cache-keepwarm",
+  "version": "0.1.0",
+  "description": "Pings the model every 50 minutes so the prompt cache stays warm, up to 8 hours after your last message.",
+  "author": { "name": "odesuk" }
+}

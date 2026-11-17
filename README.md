@@ -9,6 +9,7 @@ Mods and skills for AI coding agents.
 | weekly-usage | Claude Code | Shows the share of the weekly usage limit left for today, and the hourly budget until the reset. |
 | mod-switch | Claude Code | Lists installed plugins and skills in a pane. Switches each one on or off. |
 | agents-list | Claude Code | Lists the agents of the session in a pane, with what each one is doing. |
+| cache-keepwarm | Claude Code | Pings the model every 50 minutes so the prompt cache stays warm after your last message. |
 
 ## Install (Claude Code)
 
@@ -135,6 +136,27 @@ How to read the entries:
 - **Stop:** the button runs the `TaskStop` tool with the id of the agent. The pane shows the answer of the tool under the counts. The main conversation has no Stop button.
 - **Refresh:** the list updates when an agent starts, when a turn starts or ends and when an agent makes a tool call. Press Refresh to read it again.
 - **Not listed:** agents of a workflow are not in the list.
+
+## cache-keepwarm: usage
+
+Install it the same way as weekly-usage, with `cache-keepwarm` as the name:
+
+```
+/plugin install cache-keepwarm --marketplace odesuk/agent-toolkit
+```
+
+The mod pings the model every 50 minutes. The prompt cache then stays warm, so the next message reads the cached conversation instead of writing it again. The window counts from your last message. The default is 8 hours; after that the mod stops pinging until you send a message.
+
+Run `/keepwarm` to see the status. Set the window with a number of hours, `off`, or `on` (8 hours):
+
+```
+/keepwarm 4
+/keepwarm off
+```
+
+The setting is saved and kept across sessions. Pings wait while a turn runs, and a ping that gets no answer is retried after 5 minutes.
+
+The 50-minute interval assumes the 1-hour cache lifetime. With a 5-minute lifetime the mod keeps nothing warm.
 
 ## Notes
 

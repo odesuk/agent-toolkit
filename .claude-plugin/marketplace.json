@@ -5,6 +5,7 @@
   "plugins": [
     { "name": "weekly-usage", "source": "./weekly-usage" },
     { "name": "mod-switch", "source": "./mod-switch" },
-    { "name": "agents-list", "source": "./agents-list" }
+    { "name": "agents-list", "source": "./agents-list" },
+    { "name": "cache-keepwarm", "source": "./cache-keepwarm" }
   ]
 }
