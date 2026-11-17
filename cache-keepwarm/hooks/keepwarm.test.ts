@@ -1,6 +1,16 @@
 import { expect, test } from 'claude-code/testing'
 
-import { BUSY_CAP_MS, DEFAULT_HOURS, INTERVAL_MS, RETRY_MS, isWarmDue, parseCommand, warmedAfterFailure } from './keepwarm'
+import {
+  BUSY_CAP_MS,
+  DEFAULT_HOURS,
+  INTERVAL_MS,
+  MAX_HOURS,
+  RETRY_MS,
+  isWarmDue,
+  parseCommand,
+  parseHours,
+  warmedAfterFailure,
+} from './keepwarm'
 import type { WarmState } from './keepwarm'
 
 const H = 3600000
@@ -57,6 +67,17 @@ test('parseCommand reads status, hours, off and on', () => {
   expect(parseCommand('0.5')).toEqual({ kind: 'set', hours: 0.5 })
   expect(parseCommand('off')).toEqual({ kind: 'set', hours: 0 })
   expect(parseCommand('on')).toEqual({ kind: 'set', hours: DEFAULT_HOURS })
+})
+
+test('parseHours takes 0 to the maximum and nothing else', () => {
+  expect(parseHours(0)).toBe(0)
+  expect(parseHours(4.5)).toBe(4.5)
+  expect(parseHours(MAX_HOURS)).toBe(MAX_HOURS)
+  expect(parseHours(MAX_HOURS + 1)).toBe(null)
+  expect(parseHours(-1)).toBe(null)
+  expect(parseHours('4')).toBe(null)
+  expect(parseHours(undefined)).toBe(null)
+  expect(parseHours(Number.NaN)).toBe(null)
 })
 
 test('parseCommand refuses what is not a duration', () => {

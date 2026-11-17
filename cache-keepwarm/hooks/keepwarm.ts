@@ -32,7 +32,14 @@ export function warmedAfterFailure(now: number): number {
   return now - INTERVAL_MS + RETRY_MS
 }
 
-export type Command = { kind: 'status' } | { kind: 'set'; hours: number } | { kind: 'invalid' }
+// Reads the hours the tool's input carries: a number from 0 (off) to MAX_HOURS, else null.
+export function parseHours(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > MAX_HOURS) return null
+
+  return value
+}
+
+export type Command ={ kind: 'status' } | { kind: 'set'; hours: number } | { kind: 'invalid' }
 
 // Reads what follows /keepwarm: nothing, a number of hours, off, or on.
 export function parseCommand(args: string): Command {

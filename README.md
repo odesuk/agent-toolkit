@@ -156,6 +156,14 @@ Run `/keepwarm` to see the status. Set the window with a number of hours, `off`,
 
 The setting is saved and kept across sessions. Pings wait while a turn runs, and a ping that gets no answer is retried after 5 minutes.
 
+The model can call the mod too. It registers the tool `mcp__cache-keepwarm__keepwarm`, which loads behind ToolSearch, with three actions:
+
+- `status`: shows the setting and when the cache was last warmed.
+- `set` with `hours`: changes the window. `0` turns it off. The maximum is 168.
+- `ping`: sends one keep-warm request now, whatever the timer says.
+
+Adding the tool changes the session's tool list. Reloading the mod in the middle of a session therefore costs one cache write for that session.
+
 The 50-minute interval assumes the 1-hour cache lifetime. With a 5-minute lifetime the mod keeps nothing warm.
 
 ## Notes
