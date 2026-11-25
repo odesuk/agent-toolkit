@@ -174,13 +174,27 @@ Install it the same way as weekly-usage, with `auto-compact` as the name:
 /plugin install auto-compact --marketplace odesuk/agent-toolkit
 ```
 
-After each turn of the main conversation, the mod reads the context size. If the context holds 250,000 tokens or more, the mod runs the same compaction as `/compact`. A toast shows the result.
+After each turn of the main conversation, the mod reads the context size. When the context is too large, the mod starts a new session with a summary of the old one:
 
-Set the threshold in the plugin options (`threshold`, in tokens), or in `~/.claude/settings.json` under `pluginConfigs`.
+1. The mod asks the model for a handoff summary (`$.model.fork`, which reads the cached conversation).
+2. The mod runs `/clear`.
+3. The mod sends the summary as the first prompt of the new session, so the work continues.
 
-- **Between turns only:** compaction cannot run while a turn runs. If a new turn starts first, the mod tries again every 3 seconds, 5 times in all.
+The mod has two limits:
+
+| Limit | Default | What the mod does |
+| --- | --- | --- |
+| Soft (`threshold`) | 250,000 tokens | Hands off only at a natural break. If the model says the work is in the middle of a step, the mod waits and asks again after the next turn. The status line shows that it waits. |
+| Hard (`max`) | 500,000 tokens | Hands off after the turn, mid-task or not. If the model's window is smaller, the window is the hard limit. |
+
+Set both limits in the plugin options, or in `~/.claude/settings.json` under `pluginConfigs`.
+
+- **Never mid-turn:** the mod acts only after a turn ends. One long turn can go past a limit before the mod acts.
+- **Cost:** above the soft limit, each turn costs one extra model request for the break check.
+- **What carries over:** only the summary. Tool results and file reads stay in the old transcript.
+- **A lost summary:** the mod saves each summary in its store under `lastSummary` before `/clear`. If the new prompt fails, a toast says so.
 - **Subagents:** the mod ignores subagent turns.
-- **Built-in option:** Claude Code can also compact at a set size by itself, with the `autoCompactWindow` setting or the `CLAUDE_CODE_AUTO_COMPACT_WINDOW` variable (100,000 tokens or more).
+- **Built-in option:** to compact in place instead, use the `autoCompactWindow` setting or the `CLAUDE_CODE_AUTO_COMPACT_WINDOW` variable (100,000 tokens or more).
 
 ## Notes
 

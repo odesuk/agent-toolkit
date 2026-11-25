@@ -1,14 +1,22 @@
 {
   "name": "auto-compact",
   "version": "0.1.0",
-  "description": "Compacts the conversation between turns when the context window holds more than a set number of tokens (default 250000).",
-  "author": { "name": "odesuk" },
+  "description": "Starts a new session with a handoff summary when the context passes 250K tokens at a natural break, or 500K tokens at any point.",
+  "author": {
+    "name": "odesuk"
+  },
   "userConfig": {
     "threshold": {
       "type": "number",
-      "title": "Compact threshold (tokens)",
-      "description": "Compact after a turn whose context holds at least this many tokens.",
+      "title": "Soft limit (tokens)",
+      "description": "From this size, start a new session at the next natural break in the work.",
       "default": 250000
+    },
+    "max": {
+      "type": "number",
+      "title": "Hard limit (tokens)",
+      "description": "At this size, start a new session after the turn, mid-task or not.",
+      "default": 500000
     }
   }
 }
