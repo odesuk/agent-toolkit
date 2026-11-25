@@ -35,6 +35,13 @@ export const durationText = (ms: number): string => {
   return h >= 1 ? `${h} h ${m} m` : `${m} m`
 }
 
+// Time to a reset as "153 h", or "40 min" in the last hour.
+export const hoursLeftText = (reset: number, now: number): string => {
+  const hours = (reset - now) / HOUR
+
+  return hours < 1 ? `${Math.max(0, Math.round(hours * 60))} min` : `${Math.round(hours)} h`
+}
+
 export const computeWeek = (limits: Limit[]): WeekView => {
   const limit = findLimit(limits, 'seven_day')
 

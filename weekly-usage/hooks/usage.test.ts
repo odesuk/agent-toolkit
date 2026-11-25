@@ -8,6 +8,7 @@ import {
   findLimit,
   hasActivity,
   hourlyBudget,
+  hoursLeftText,
   paceAllowance,
   paceIcon,
   parseRecords,
@@ -216,4 +217,10 @@ test('parseRecords drops malformed entries', () => {
 test('parseRecords returns an empty list for non-arrays', () => {
   expect(parseRecords(undefined)).toEqual([])
   expect(parseRecords({ a: 1 })).toEqual([])
+})
+
+test('hoursLeftText shows hours, or minutes in the last hour', () => {
+  expect(hoursLeftText(now + 153.4 * hour, now)).toBe('153 h')
+  expect(hoursLeftText(now + 40 * 60000, now)).toBe('40 min')
+  expect(hoursLeftText(now - hour, now)).toBe('0 min')
 })

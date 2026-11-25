@@ -9,6 +9,7 @@ import {
   findLimit,
   hasActivity,
   hourlyBudget,
+  hoursLeftText,
   paceIcon,
   parseRecords,
   parseReset,
@@ -33,10 +34,8 @@ const clockText = (ms: number) => {
 const weeklyResetText = (resetsAt: string | null, now: number) => {
   const reset = parseReset(resetsAt)
   if (reset === null) return ''
-  const hours = (reset - now) / 3600000
-  const left = hours < 1 ? `${Math.max(0, Math.round(hours * 60))} min` : `${Math.round(hours)} h`
 
-  return ` Resets ${weekdayTime(reset)} (${left})`
+  return ` Resets ${weekdayTime(reset)} (${hoursLeftText(reset, now)})`
 }
 
 async function record($: EngineInterface, limits: Limit[]) {
@@ -152,11 +151,11 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Text bold>{headline}</Text>
         <Text>
-          📅 Weekly: {view.percentUsed}% used, {left}% left.{weeklyResetText(view.resetsAt, now)}
+          📅 {paceIcon(left)} Weekly: {view.percentUsed}% used, {left}% left.{weeklyResetText(view.resetsAt, now)}
         </Text>
-        {hourly !== null && (
+        {hourly !== null && reset !== null && (
           <Text>
-            ⏱️ Hourly: {hourly.toFixed(1)}% per hour to reset (base 100% per hour)
+            ⏱️ Hourly: {hourly.toFixed(1)}% per hour for {hoursLeftText(reset, now)} to reset (base 100% per hour)
           </Text>
         )}
         {fiveHour !== undefined && (

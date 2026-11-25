@@ -1,0 +1,7 @@
+{
+  "name": "weekly-usage-codex",
+  "owner": { "name": "odesuk" },
+  "plugins": [
+    { "name": "weekly-usage-codex", "source": "./" }
+  ]
+}
