@@ -166,6 +166,22 @@ Adding the tool changes the session's tool list. Reloading the mod in the middle
 
 The 50-minute interval assumes the 1-hour cache lifetime. With a 5-minute lifetime the mod keeps nothing warm.
 
+## auto-compact: usage
+
+Install it the same way as weekly-usage, with `auto-compact` as the name:
+
+```
+/plugin install auto-compact --marketplace odesuk/agent-toolkit
+```
+
+After each turn of the main conversation, the mod reads the context size. If the context holds 250,000 tokens or more, the mod runs the same compaction as `/compact`. A toast shows the result.
+
+Set the threshold in the plugin options (`threshold`, in tokens), or in `~/.claude/settings.json` under `pluginConfigs`.
+
+- **Between turns only:** compaction cannot run while a turn runs. If a new turn starts first, the mod tries again every 3 seconds, 5 times in all.
+- **Subagents:** the mod ignores subagent turns.
+- **Built-in option:** Claude Code can also compact at a set size by itself, with the `autoCompactWindow` setting or the `CLAUDE_CODE_AUTO_COMPACT_WINDOW` variable (100,000 tokens or more).
+
 ## Notes
 
 - weekly-usage, mod-switch and agents-list use the Claude Code plugin API. They do not run in Codex or Antigravity.

@@ -1,0 +1,14 @@
+{
+  "name": "auto-compact",
+  "version": "0.1.0",
+  "description": "Compacts the conversation between turns when the context window holds more than a set number of tokens (default 250000).",
+  "author": { "name": "odesuk" },
+  "userConfig": {
+    "threshold": {
+      "type": "number",
+      "title": "Compact threshold (tokens)",
+      "description": "Compact after a turn whose context holds at least this many tokens.",
+      "default": 250000
+    }
+  }
+}

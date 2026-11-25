@@ -6,6 +6,7 @@
     { "name": "weekly-usage", "source": "./weekly-usage" },
     { "name": "mod-switch", "source": "./mod-switch" },
     { "name": "agents-list", "source": "./agents-list" },
-    { "name": "cache-keepwarm", "source": "./cache-keepwarm" }
+    { "name": "cache-keepwarm", "source": "./cache-keepwarm" },
+    { "name": "auto-compact", "source": "./auto-compact" }
   ]
 }
