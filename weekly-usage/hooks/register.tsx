@@ -140,7 +140,7 @@ export const register: Register = on => {
     const headline =
       available === null || reset === null
         ? "⚪ Today's share unknown"
-        : `${paceIcon(available)} ${available.toFixed(1)}% available until ${weekdayTime(endOfToday(reset, now))}`
+        : `${paceIcon(available)} ${available.toFixed(1)}% available until ${weekdayTime(endOfToday(reset, now))} (${durationText(endOfToday(reset, now) - now)})`
     const usage = await $.session.usage()
     const fiveHour = findLimit(usage.rateLimits, 'five_hour')
     const fiveReset = parseReset(fiveHour?.resetsAt)

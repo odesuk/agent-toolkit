@@ -1,0 +1,6 @@
+{
+  "name": "weekly-usage-codex",
+  "version": "0.1.5",
+  "description": "Shows how much of today's Codex usage share remains.",
+  "skills": "./skills/"
+}

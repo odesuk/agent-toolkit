@@ -33,7 +33,7 @@ const remaining = hours ? `${hours} h ${minutes % 60} m` : `${minutes} m`
 const left = Math.round((100 - weekly.usedPercent) * 10) / 10
 const pace = v => v >= 50 ? '🟢' : v >= 15 ? '🟡' : '🔴'
 const hourly = reset > now ? `\nHourly: ${(Math.round(((100 - weekly.usedPercent) * 168 / ((reset - now) / 3600000)) * 10) / 10).toFixed(1)}% per hour for ${remaining} to reset (base 100% per hour)` : ''
-text(`${pace(available)} ${available.toFixed(1)}% of today's share available until ${at(end)}\n${pace(left)} Weekly: ${weekly.usedPercent}% used, ${left}% left. Resets ${at(reset)} (${remaining})${hourly}`)
+text(`${pace(available)} ${available.toFixed(1)}% of today's share available until ${at(end)} (${Math.floor((end - now) / 3600000)} h ${Math.floor((end - now) / 60000) % 60} m)\n${pace(left)} Weekly: ${weekly.usedPercent}% used, ${left}% left. Resets ${at(reset)} (${remaining})${hourly}`)
 ```
 
 If `functions.exec` is unavailable or returns `FAST_PATH_UNAVAILABLE`, run `node scripts/weekly-usage.mjs` using the absolute path to the script in this skill's directory, and report its output exactly. If neither path can read a weekly limit and reset time, report that it is unavailable rather than inferring an allowance.

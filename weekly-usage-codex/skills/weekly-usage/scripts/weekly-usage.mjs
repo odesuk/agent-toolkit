@@ -45,7 +45,7 @@ function format(snapshot, now = Date.now()) {
   const perHour = Math.round(((100 - weekly.usedPercent) * 168 / ((reset - now) / HOUR)) * 10) / 10
   const hourly = reset > now ? `\nHourly: ${perHour.toFixed(1)}% per hour for ${resetLeft} to reset (base 100% per hour)` : ''
 
-  return `${pace(dailyPercentLeft)} ${dailyPercentLeft.toFixed(1)}% of today's share available until ${weekdayTime(end)}\n${pace(left)} Weekly: ${weekly.usedPercent}% used, ${left}% left. Resets ${weekdayTime(reset)} (${resetLeft})${hourly}`
+  return `${pace(dailyPercentLeft)} ${dailyPercentLeft.toFixed(1)}% of today's share available until ${weekdayTime(end)} (${duration(end - now)})\n${pace(left)} Weekly: ${weekly.usedPercent}% used, ${left}% left. Resets ${weekdayTime(reset)} (${resetLeft})${hourly}`
 }
 
 function readRateLimits() {
