@@ -1,9 +1,10 @@
-import type { Register } from 'claude-code'
+import type { EngineInterface, Register } from 'claude-code'
 
 const DEFAULT_THRESHOLD = 250_000
 const DEFAULT_MAX = 500_000
 const DELAY_MS = 500
 export const SUMMARY_KEY = 'lastSummary'
+export const ENABLED_KEY = 'enabled'
 export const WAIT = 'WAIT'
 
 const SUMMARY_ASK = [
@@ -28,6 +29,27 @@ export const HARD_PROMPT = `This session's context is full and it will be cleare
 export const handoff = (summary: string) =>
   `auto-compact cleared the previous session at its context limit. Continue the work from this handoff summary:\n\n${summary}`
 
+// Default ON: only a stored false turns the mod off.
+const isOn = async ($: EngineInterface) => {
+  try {
+    return (await $.store.get(ENABLED_KEY)) !== false
+  } catch {
+    return true
+  }
+}
+
+// A native notification where the surface raises one; a toast where it cannot.
+const notify = async ($: EngineInterface, text: string) => {
+  try {
+    if ((await $.ui.notify(text, { title: 'auto-compact' })).isSent) return
+  } catch {
+    // falls through to the toast
+  }
+  $.ui.toast(`auto-compact: ${text}`)
+}
+
+export const USAGE_TEXT = 'Use /auto-compact, /auto-compact on or /auto-compact off.'
+
 const positive = (value: unknown, fallback: number) =>
   typeof value === 'number' && value > 0 ? value : fallback
 
@@ -37,9 +59,26 @@ export const register: Register = (on, options) => {
   // One handoff at a time; the new session's first turn reads its own size.
   let isPending = false
 
+  on('session.start', async ($, e, next) => {
+    await $.command.register({
+      name: 'auto-compact',
+      description: 'Turn auto-compact on or off, or show its state',
+      argumentHint: '[on|off]',
+    })
+    return next(e)
+  })
+
+  on('command.run', { command: 'auto-compact' }, async ($, e) => {
+    const arg = (e.args ?? '').trim().toLowerCase()
+    if (arg === 'on' || arg === 'off') await $.store.set(ENABLED_KEY, arg === 'on')
+    else if (arg !== '') return { text: USAGE_TEXT }
+    const state = (await isOn($)) ? 'ON' : 'OFF'
+    return { text: `auto-compact is ${state}: soft limit ${threshold / 1000}K, hard limit ${max / 1000}K tokens.` }
+  })
+
   on('turn.complete', async ($, e, next) => {
     const done = await next(e)
-    if (e.agentId !== undefined || isPending) return done
+    if (e.agentId !== undefined || isPending || !(await isOn($))) return done
 
     const { context } = await $.session.usage()
     const tokens = context.tokens ?? 0
@@ -58,7 +97,7 @@ export const register: Register = (on, options) => {
           return
         }
         if (!summary || summary === WAIT) {
-          $.ui.toast(`auto-compact: no summary (${fork.isAnswered ? 'empty-reply' : fork.reason}), session kept`)
+          await notify($, `No summary (${fork.isAnswered ? 'empty-reply' : fork.reason}). Session kept.`)
           return
         }
         // Kept across sessions so a failed submit after /clear loses nothing.
@@ -67,9 +106,9 @@ export const register: Register = (on, options) => {
         await $.command.run({ command: 'clear' })
         await $.prompt.submit({ text: handoff(summary) })
         $.ui.status(undefined)
-        $.ui.toast(`auto-compact: new session started at ${Math.round(tokens / 1000)}K tokens`)
+        await notify($, `New session started at ${Math.round(tokens / 1000)}K tokens, with a handoff summary.`)
       } catch {
-        $.ui.toast(`auto-compact: handoff failed; the summary is in the mod's store under ${SUMMARY_KEY}`)
+        await notify($, `Handoff failed. The summary is in the mod's store under ${SUMMARY_KEY}.`)
       } finally {
         isPending = false
       }

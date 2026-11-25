@@ -189,6 +189,18 @@ The mod has two limits:
 
 Set both limits in the plugin options, or in `~/.claude/settings.json` under `pluginConfigs`.
 
+The mod is ON by default. Turn it on or off with a command. The setting is kept across sessions:
+
+```
+/auto-compact off
+/auto-compact on
+/auto-compact
+```
+
+`/auto-compact` alone shows the state and both limits.
+
+After each handoff, the mod sends a notification. A failed handoff or a missing summary also sends one. Where the surface cannot raise a notification, a toast shows the same text.
+
 - **Never mid-turn:** the mod acts only after a turn ends. One long turn can go past a limit before the mod acts.
 - **Cost:** above the soft limit, each turn costs one extra model request for the break check.
 - **What carries over:** only the summary. Tool results and file reads stay in the old transcript.
